@@ -12,9 +12,12 @@ int git_push();
 
 int main() {
 	git_status();
+	printf("Continue(add, commit)?\n y/n\n");
 	if (!git_add())
 		return 0;
+	printf("Continue(add, commit)?\n y/n\n");
 	git_commit();
+	printf("Continue(add, commit)?\n y/n\n");
 	git_push();
 	return 0;
 }
