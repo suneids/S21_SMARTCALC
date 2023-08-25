@@ -17,8 +17,8 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
-        stack.c
-        stack.h
+        s21_stack.c
+        s21_stack.h
 
 )
 
@@ -26,8 +26,11 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(S21_SMARTCALC
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        s21_smartcalc_tests.c
+        s21_lexem_parse.c
+        s21_lexem_parse.h
     )
-efine target properties for Android with Qt 6 as:
+#Define target properties for Android with Qt 6 as:
 #    set_property(TARGET S21_SMARTCALC APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
 #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
