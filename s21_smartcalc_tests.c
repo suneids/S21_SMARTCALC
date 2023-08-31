@@ -97,10 +97,103 @@ START_TEST(LEXEMS_NORMAL_TEST) {
 }
 END_TEST
 
+START_TEST(LEXEMS_EMPTY_TEST) {
+    char input_string[] = "";
+    int lexems_count;
+    char **lexems = s21_get_lexems(input_string, &lexems_count);
+    ck_assert_ptr_null(lexems);
+}
+END_TEST
+
+START_TEST(LEXEMS_COMPLEX_TEST) {
+    char input_string[] = "1 + 2 * (3 - 4) / 5";
+    char correct_lexems[][10] = {"1","+","2","*","(","3","-","4",")","/","5"};
+    int lexems_count;
+    char **lexems = s21_get_lexems(input_string, &lexems_count);
+    for(int i = 0; i < 12; i++){
+        ck_assert_str_eq(lexems[i], correct_lexems[i]);
+    }
+    s21_destroy_lexems(lexems, lexems_count);
+}
+END_TEST
+
+START_TEST(LEXEMS_SINGLE_NUMBER_TEST) {
+    char input_string[] = "123";
+    char correct_lexems[][10] = {"123"};
+    int lexems_count;
+    char **lexems = s21_get_lexems(input_string, &lexems_count);
+    ck_assert_str_eq(lexems[0], correct_lexems[0]);
+    s21_destroy_lexems(lexems, lexems_count);
+}
+END_TEST
+
+START_TEST(LEXEMS_SINGLE_OPERATOR_TEST) {
+    char input_string[] = "+";
+    char correct_lexems[][10] = {"+"};
+    int lexems_count;
+    char **lexems = s21_get_lexems(input_string, &lexems_count);
+    ck_assert_str_eq(lexems[0], correct_lexems[0]);
+    s21_destroy_lexems(lexems, lexems_count);
+}
+END_TEST
+
+START_TEST(LEXEMS_MIXED_TEST) {
+    char input_string[] = "12+34*56";
+    char correct_lexems[][10] = {"12","+","34","*","56"};
+    int lexems_count;
+    char **lexems = s21_get_lexems(input_string, &lexems_count);
+    for(int i = 0; i < 5; i++){
+        ck_assert_str_eq(lexems[i], correct_lexems[i]);
+    }
+    s21_destroy_lexems(lexems, lexems_count);
+}
+END_TEST
+
+START_TEST(LEXEMS_PARENTHESES_TEST) {
+    char input_string[] = "(2+3)*(4-5)";
+    char correct_lexems[][10] = {"(","2","+","3",")","*","(","4","-","5",")"};
+    int lexems_count;
+    char **lexems = s21_get_lexems(input_string, &lexems_count);
+    for(int i = 0; i < 11; i++){
+        ck_assert_str_eq(lexems[i], correct_lexems[i]);
+    }
+    s21_destroy_lexems(lexems, lexems_count);
+}
+END_TEST
+
+START_TEST(LEXEMS_DECIMAL_NUMBER_TEST) {
+    char input_string[] = "3.14";
+    char correct_lexems[][10] = {"3.14"};
+    int lexems_count;
+    char **lexems = s21_get_lexems(input_string, &lexems_count);
+    ck_assert_str_eq(lexems[0], correct_lexems[0]);
+    s21_destroy_lexems(lexems, lexems_count);
+}
+END_TEST
+
+START_TEST(LEXEMS_NEGATIVE_NUMBER_TEST) {
+    char input_string[] = "-5";
+    char correct_lexems[][10] = {"-","5"};
+    int lexems_count;
+    char **lexems = s21_get_lexems(input_string, &lexems_count);
+    for(int i = 0; i < 2; i++){
+        ck_assert_str_eq(lexems[i], correct_lexems[i]);
+    }
+    s21_destroy_lexems(lexems, lexems_count);
+}
+END_TEST
 Suite *s21_get_lexems_test(void) {
     Suite *suite = suite_create("s21_get_lexems");
     TCase *tCase = tcase_create("s21_get_lexems");
     tcase_add_test(tCase, LEXEMS_NORMAL_TEST);
+    tcase_add_test(tCase, LEXEMS_EMPTY_TEST);
+    tcase_add_test(tCase, LEXEMS_COMPLEX_TEST);
+    tcase_add_test(tCase, LEXEMS_SINGLE_NUMBER_TEST);
+    tcase_add_test(tCase, LEXEMS_SINGLE_OPERATOR_TEST);
+    tcase_add_test(tCase, LEXEMS_MIXED_TEST);
+    tcase_add_test(tCase, LEXEMS_PARENTHESES_TEST);
+    tcase_add_test(tCase, LEXEMS_DECIMAL_NUMBER_TEST);
+    tcase_add_test(tCase, LEXEMS_NEGATIVE_NUMBER_TEST);
     suite_add_tcase(suite, tCase);
 
     return suite;
