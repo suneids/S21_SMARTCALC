@@ -1,11 +1,14 @@
 #include <stdio.h>
 #include <check.h>
+#include <stdlib.h>
+#include <string.h>
 #include "s21_stack.h"
 #include "s21_lexem_parse.h"
 
 START_TEST(STACK_NULL_PUSH) {
     stack *test_stack = NULL;
-    ck_assert(s21_push(&test_stack, 10, '\0') == SUCCES);
+    stack_item new_item = { 10, "\0", 0};
+    ck_assert(s21_push(&test_stack, new_item) == SUCCES);
     s21_destroy_stack(test_stack);
 }
 END_TEST
@@ -19,10 +22,9 @@ END_TEST
 
 START_TEST(STACK_NULL_TOP) {
     stack *test_stack = NULL;
-    double value;
-    char oper;
-    s21_top(test_stack, &value, &oper);
-    ck_assert((value == 0) &&(oper == '\0'));
+    stack_item item;
+    s21_top(test_stack, &item);
+    ck_assert((item.number == 0) &&(!strcmp(item.oper, "\0")));
     s21_destroy_stack(test_stack);
 }
 END_TEST
@@ -36,8 +38,9 @@ END_TEST
 
 START_TEST(STACK_NORMAL_LENGTH_1) {
     stack *test_stack = NULL;
-    s21_push(&test_stack, 15, '\0');
-    s21_push(&test_stack, 15, '\0');
+    stack_item new_item = {15, "\0", 0};
+    s21_push(&test_stack, new_item);
+    s21_push(&test_stack, new_item);
     ck_assert(s21_sizeof_stack(test_stack) == 2);
     s21_destroy_stack(test_stack);
 }
@@ -45,27 +48,29 @@ END_TEST
 
 START_TEST(STACK_NORMAL_LENGTH_2) {
     stack *test_stack = NULL;
-    s21_push(&test_stack, 15, '\0');
-    s21_push(&test_stack, 15, '\0');
+    stack_item new_item = {15, "\0", 0};
+    s21_push(&test_stack, new_item);
+    s21_push(&test_stack, new_item);
     stack *last_item = s21_pop(test_stack);
     ck_assert(s21_sizeof_stack(test_stack) == 1);
-    s21_destroy_stack(last_item);
+    free(last_item);
     s21_destroy_stack(test_stack);
 }
 END_TEST
 
 START_TEST(STACK_NORMAL_LENGTH_3) {
     stack *test_stack = NULL;
-    s21_push(&test_stack, 15, '\0');
-    s21_push(&test_stack, 15, '\0');
+    stack_item new_item = {15, "\0", 0};
+    s21_push(&test_stack, new_item);
+    s21_push(&test_stack, new_item);
     stack *last_item = s21_pop(test_stack);
-    s21_destroy_stack(last_item);
-    s21_push(&test_stack, 15, '\0');
-    s21_push(&test_stack, 15, '\0');
-    s21_push(&test_stack, 15, '\0');
+    free(last_item);
+    s21_push(&test_stack, new_item);
+    s21_push(&test_stack, new_item);
+    s21_push(&test_stack, new_item);
     last_item = s21_pop(test_stack);
     ck_assert(s21_sizeof_stack(test_stack) == 3);
-    s21_destroy_stack(last_item);
+    free(last_item);
     s21_destroy_stack(test_stack);
 }
 END_TEST
@@ -106,11 +111,11 @@ START_TEST(LEXEMS_EMPTY_TEST) {
 END_TEST
 
 START_TEST(LEXEMS_COMPLEX_TEST) {
-    char input_string[] = "1 + 2 * (3 - 4) / 5";
+    char input_string[] = " 1 + 2 * ( 3 - 4 ) / 5";
     char correct_lexems[][10] = {"1","+","2","*","(","3","-","4",")","/","5"};
-    int lexems_count;
+    int lexems_count = 0;
     char **lexems = s21_get_lexems(input_string, &lexems_count);
-    for(int i = 0; i < 12; i++){
+    for(int i = 0; i < 11; i++){
         ck_assert_str_eq(lexems[i], correct_lexems[i]);
     }
     s21_destroy_lexems(lexems, lexems_count);
@@ -182,6 +187,17 @@ START_TEST(LEXEMS_NEGATIVE_NUMBER_TEST) {
     s21_destroy_lexems(lexems, lexems_count);
 }
 END_TEST
+
+START_TEST(LEXEMS_BIG_BUFFER_TEST) {
+    char input_string[] = "123456789";
+    char correct_lexems[][10] = {"123456789"};
+    int lexems_count;
+    char **lexems = s21_get_lexems(input_string, &lexems_count);
+    ck_assert_str_eq(lexems[0], correct_lexems[0]);
+    s21_destroy_lexems(lexems, lexems_count);
+}
+END_TEST
+
 Suite *s21_get_lexems_test(void) {
     Suite *suite = suite_create("s21_get_lexems");
     TCase *tCase = tcase_create("s21_get_lexems");
@@ -194,6 +210,7 @@ Suite *s21_get_lexems_test(void) {
     tcase_add_test(tCase, LEXEMS_PARENTHESES_TEST);
     tcase_add_test(tCase, LEXEMS_DECIMAL_NUMBER_TEST);
     tcase_add_test(tCase, LEXEMS_NEGATIVE_NUMBER_TEST);
+    tcase_add_test(tCase, LEXEMS_BIG_BUFFER_TEST);
     suite_add_tcase(suite, tCase);
 
     return suite;
